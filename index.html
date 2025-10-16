@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Presupuesto App</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .monto-total {
+            text-align: center;
+            font-size: 48px;
+            color: #28a745;
+            margin: 20px 0;
+        }
+        
+        /* Tabs (pestañas) */
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin: 30px 0;
+        }
+        
+        .tab {
+            flex: 1;
+            padding: 15px;
+            background: #e0e0e0;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            border-radius: 5px;
+            transition: all 0.3s;
+        }
+        
+        .tab.active {
+            background: #2c3e50;
+            color: white;
+        }
+        
+        .tab:hover {
+            background: #34495e;
+            color: white;
+        }
+        
+        /* Lista de transacciones */
+        .lista-transacciones {
+            margin: 20px 0;
+        }
+        
+        .transaccion-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            margin: 10px 0;
+            background: #f8f9fa;
+            border-radius: 5px;
+            border-left: 4px solid #28a745;
+        }
+        
+        .transaccion-item.egreso {
+            border-left-color: #dc3545;
+        }
+        
+        .transaccion-descripcion {
+            font-size: 16px;
+            color: #333;
+        }
+        
+        .transaccion-monto {
+            font-size: 18px;
+            font-weight: bold;
+        }
+        
+        .transaccion-monto.ingreso {
+            color: #28a745;
+        }
+        
+        .transaccion-monto.egreso {
+            color: #dc3545;
+        }
+        
+        .porcentaje {
+            background: #ffc107;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 14px;
+            margin-left: 10px;
+        }
+        
+        /* Totales */
+        .totales {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 30px 0;
+        }
+        
+        .cuadro-total {
+            padding: 20px;
+            border-radius: 5px;
+            text-align: center;
+        }
+        
+        .cuadro-total.ingresos {
+            background: #d4edda;
+            border: 2px solid #28a745;
+        }
+        
+        .cuadro-total.egresos {
+            background: #f8d7da;
+            border: 2px solid #dc3545;
+        }
+        
+        .cuadro-total h3 {
+            margin-bottom: 10px;
+            color: #333;
+        }
+        
+        .cuadro-total .monto {
+            font-size: 32px;
+            font-weight: bold;
+        }
+        
+        .cuadro-total.ingresos .monto {
+            color: #28a745;
+        }
+        
+        .cuadro-total.egresos .monto {
+            color: #dc3545;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Título con mes y año -->
+        <h1 id="titulo">Presupuesto de [Mes] [Año]</h1>
+        
+        <!-- Monto total disponible -->
+        <div class="monto-total" id="montoDisponible">+ 0.00</div>
+        
+        <!-- Cuadros de totales -->
+        <div class="totales">
+            <div class="cuadro-total ingresos">
+                <h3>INGRESOS</h3>
+                <div class="monto" id="totalIngresos">0.00</div>
+            </div>
+            <div class="cuadro-total egresos">
+                <h3>EGRESOS</h3>
+                <div class="monto" id="totalEgresos">0.00</div>
+            </div>
+        </div>
+        
+        <!-- Tabs (pestañas) -->
+        <div class="tabs">
+            <button class="tab active" id="tabIngresos" onclick="cambiarTab('ingresos')">
+                Ingresos
+            </button>
+            <button class="tab" id="tabEgresos" onclick="cambiarTab('egresos')">
+                Egresos
+            </button>
+        </div>
+        
+        <!-- Lista de transacciones -->
+        <div class="lista-transacciones" id="listaTransacciones">
+            <!-- Aquí se renderizarán las transacciones dinámicamente -->
+        </div>
+    </div>
+
+    <script>
+        // ========================================
+        // PASO 1: ARRAY PARA GUARDAR TRANSACCIONES
+        // ========================================
+        
+        // Este array guardará TODAS las transacciones (ingresos y egresos)
+        let transacciones = [];
+        
+        // Variable para saber qué tab está activo
+        let tabActivo = 'ingreso'; // Puede ser 'ingresos' o 'egresos'
+        
+        
+        // ========================================
+        // PASO 2: FUNCIÓN PARA AGREGAR TRANSACCIONES
+        // ========================================
+        
+        /**
+         * Esta función agrega una nueva transacción al array
+         * @param {string} tipo - "ingreso" o "egreso"
+         * @param {string} descripcion - Descripción de la transacción
+         * @param {number} monto - Cantidad de dinero
+         */
+        function agregarTransaccion(tipo, descripcion, monto) {
+            // Crear un objeto con la información
+            let nuevaTransaccion = {
+                tipo: tipo,
+                descripcion: descripcion,
+                monto: parseFloat(monto) // Convertir a número decimal
+            };
+            
+            // Agregar el objeto al array
+            transacciones.push(nuevaTransaccion);
+            
+            console.log('Transacción agregada:', nuevaTransaccion);
+            console.log('Total transacciones:', transacciones.length);
+            
+            // Actualizar la vista
+            actualizarTodo();
+        }
+        
+        
+        // ========================================
+        // PASO 3: SISTEMA DE TABS
+        // ========================================
+        
+        /**
+         * Esta función cambia entre las pestañas de Ingresos y Egresos
+         * @param {string} nuevoTab - "ingresos" o "egresos"
+         */
+        function cambiarTab(nuevoTab) {
+    console.log('Cambiando a tab:', nuevoTab);
+    
+    // Convertir de plural a singular
+    if (nuevoTab === 'ingresos') {
+        tabActivo = 'ingreso';
+    } else if (nuevoTab === 'egresos') {
+        tabActivo = 'egreso';
+    }
+    
+    // Quitar la clase 'active' de todos los tabs
+    document.getElementById('tabIngresos').classList.remove('active');
+    document.getElementById('tabEgresos').classList.remove('active');
+    
+    // Agregar la clase 'active' al tab seleccionado
+    if (nuevoTab === 'ingresos') {
+        document.getElementById('tabIngresos').classList.add('active');
+    } else {
+        document.getElementById('tabEgresos').classList.add('active');
+    }
+    
+    // Renderizar las transacciones del tab activo
+    renderizarTransacciones();
+}
+        
+        
+        // ========================================
+        // PASO 4: RENDERIZAR TRANSACCIONES
+        // ========================================
+        
+        /**
+         * Esta función muestra las transacciones en pantalla según el tab activo
+         */
+        function renderizarTransacciones() {
+            console.log('Renderizando transacciones del tab:', tabActivo);
+            
+            // Obtener el contenedor donde se mostrarán las transacciones
+            let contenedor = document.getElementById('listaTransacciones');
+            
+            // Limpiar el contenedor
+            contenedor.innerHTML = '';
+            
+            // Filtrar transacciones según el tab activo
+            let transaccionesFiltradas = transacciones.filter(function(t) {
+                return t.tipo === tabActivo;
+            });
+            
+            console.log('Transacciones filtradas:', transaccionesFiltradas.length);
+            
+            // Si no hay transacciones, mostrar mensaje
+            if (transaccionesFiltradas.length === 0) {
+                contenedor.innerHTML = '<p style="text-align:center; color:#999; padding:20px;">No hay transacciones de tipo ' + tabActivo + '</p>';
+                return;
+            }
+            
+            // Calcular el total de ingresos (necesario para los porcentajes)
+            let totalIngresos = calcularTotalIngresos();
+            
+            // Recorrer cada transacción filtrada
+            transaccionesFiltradas.forEach(function(transaccion) {
+                // Crear el elemento HTML para cada transacción
+                let html = '<div class="transaccion-item ' + transaccion.tipo + '">';
+                html += '    <span class="transaccion-descripcion">' + transaccion.descripcion + '</span>';
+                html += '    <div>';
+                html += '        <span class="transaccion-monto ' + transaccion.tipo + '">';
+                
+                // Agregar signo + o - según el tipo
+                if (transaccion.tipo === 'ingreso') {
+                    html += '+ ';
+                } else {
+                    html += '- ';
+                }
+                
+                html += transaccion.monto.toFixed(2) + '</span>';
+                
+                // Si es egreso, calcular y mostrar el porcentaje
+                if (transaccion.tipo === 'egreso' && totalIngresos > 0) {
+                    let porcentaje = (transaccion.monto * 100) / totalIngresos;
+                    html += '<span class="porcentaje">' + porcentaje.toFixed(0) + '%</span>';
+                }
+                
+                html += '    </div>';
+                html += '</div>';
+                
+                // Agregar al contenedor
+                contenedor.innerHTML += html;
+            });
+        }
+        
+        
+        // ========================================
+        // PASO 5: CALCULAR TOTALES
+        // ========================================
+        
+        /**
+         * Calcula el total de INGRESOS
+         * @returns {number} Total de ingresos
+         */
+        function calcularTotalIngresos() {
+            let total = 0;
+            
+            // Recorrer todas las transacciones
+            transacciones.forEach(function(t) {
+                if (t.tipo === 'ingreso') {
+                    total += t.monto;
+                }
+            });
+            
+            return total;
+        }
+        
+        /**
+         * Calcula el total de EGRESOS
+         * @returns {number} Total de egresos
+         */
+        function calcularTotalEgresos() {
+            let total = 0;
+            
+            // Recorrer todas las transacciones
+            transacciones.forEach(function(t) {
+                if (t.tipo === 'egreso') {
+                    total += t.monto;
+                }
+            });
+            
+            return total;
+        }
+        
+        /**
+         * Actualiza los cuadros de totales en pantalla
+         */
+        function actualizarTotales() {
+            let totalIngresos = calcularTotalIngresos();
+            let totalEgresos = calcularTotalEgresos();
+            let disponible = totalIngresos - totalEgresos;
+            
+            // Actualizar en el HTML
+            document.getElementById('totalIngresos').textContent = totalIngresos.toFixed(2);
+            document.getElementById('totalEgresos').textContent = totalEgresos.toFixed(2);
+            
+            let montoDisponible = document.getElementById('montoDisponible');
+            montoDisponible.textContent = (disponible >= 0 ? '+ ' : '- ') + Math.abs(disponible).toFixed(2);
+            
+            // Cambiar color según si es positivo o negativo
+            if (disponible >= 0) {
+                montoDisponible.style.color = '#28a745';
+            } else {
+                montoDisponible.style.color = '#dc3545';
+            }
+        }
+        
+        
+        // ========================================
+        // PASO 6: ACTUALIZAR TÍTULO CON FECHA
+        // ========================================
+        
+        /**
+         * Actualiza el título con el mes y año actual
+         */
+        function actualizarTitulo() {
+            let fecha = new Date();
+            let meses = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 
+                         'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+            
+            let mes = meses[fecha.getMonth()];
+            let año = fecha.getFullYear();
+            
+            document.getElementById('titulo').textContent = 'Presupuesto de ' + mes + ' ' + año;
+        }
+        
+        
+        // ========================================
+        // PASO 7: FUNCIÓN MAESTRA QUE ACTUALIZA TODO
+        // ========================================
+        
+        /**
+         * Esta función actualiza toda la interfaz
+         */
+        function actualizarTodo() {
+            console.log('Actualizando toda la interfaz...');
+            actualizarTitulo();
+            actualizarTotales();
+            renderizarTransacciones();
+        }
+        
+        
+        // ========================================
+        // INICIALIZACIÓN
+        // ========================================
+        
+        // Cuando cargue la página, actualizar el título
+        window.onload = function() {
+            console.log('Aplicación iniciada');
+            actualizarTitulo();
+            
+            // DATOS DE PRUEBA (eliminar después)
+            agregarTransaccion('ingreso', 'Salario', 800);
+            agregarTransaccion('ingreso', 'Freelance', 200);
+            agregarTransaccion('egreso', 'Supermercado', 200);
+            agregarTransaccion('egreso', 'Servicios básicos', 100);
+        };
+    </script>
+</body>
+</html>
