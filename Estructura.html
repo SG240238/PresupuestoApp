@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Presupuesto Mensual</title>
+  <link rel="stylesheet" href="Estructura.css" />
+</head>
+<body>
+  <div class="wrapper">
+    <div class="contenedor-central">
+      <header class="encabezado">
+        <h1 id="titulo-mes">Presupuesto de </h1>
+        <h2 id="total">+ 0.00</h2>
+
+        <div class="cajas">
+          <div class="caja ingresos">
+            <span class="texto">INGRESOS:</span>
+            <span id="ingresos">+ 0.00</span>
+          </div>
+          <div class="caja egresos">
+            <span class="texto">EGRESOS:</span>
+            <span id="egresos">- 0.00</span>
+          </div>
+        </div>
+
+        <p class="porcentaje">
+          Porcentaje de gastos: <span id="porcentaje">0%</span>
+        </p>
+      </header>
+
+      <main class="contenido">
+        <section class="inferior">
+          <div class="transaccion">
+            <h3>Transacción</h3>
+            <div class="formulario">
+              <select id="tipo">
+                <option value="ingreso">Ingreso</option>
+                <option value="egreso">Egreso</option>
+              </select>
+              <input type="text" id="descripcion" placeholder="Descripción" />
+              <input type="number" id="monto" placeholder="Monto" />
+              <button id="agregar">Agregar</button>
+            </div>
+          </div>
+
+          <div class="lista-transacciones">
+            <div class="tabs">
+              <button id="tab-ingresos">Ingresos</button>
+              <button id="tab-egresos">Egresos</button>
+            </div>
+            <ul id="lista-ingresos" class="lista"></ul>
+            <ul id="lista-egresos" class="lista"></ul>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <div class="footer-content">
+      <p>© <span id="anio-footer"></span> MiApp Presupuesto. Todos los derechos reservados.</p>
+      <p><a href="#">Política de privacidad</a> | <a href="#">Términos de uso</a></p>
+    </div>
+  </footer>
+
+  <script>
+    // Mostrar mes actual
+    const meses = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
+    const fecha = new Date();
+    document.getElementById("titulo-mes").textContent = `Presupuesto de ${meses[fecha.getMonth()]} ${fecha.getFullYear()}`;
+
+    let ingresos = 0;
+    let egresos = 0;
+
+    document.getElementById("agregar").addEventListener("click", () => {
+      const tipo = document.getElementById("tipo").value;
+      const descripcion = document.getElementById("descripcion").value.trim();
+      const monto = parseFloat(document.getElementById("monto").value);
+      if (!descripcion || isNaN(monto) || monto <= 0) return;
+
+      const li = document.createElement("li");
+      li.innerHTML = `<span>${descripcion}</span><span>${tipo === "ingreso" ? "+ " : "- "}${monto.toFixed(2)}</span>`;
+
+      if (tipo === "ingreso") {
+        document.getElementById("lista-ingresos").appendChild(li);
+        ingresos += monto;
+      } else {
+        document.getElementById("lista-egresos").appendChild(li);
+        egresos += monto;
+      }
+
+      actualizar();
+      document.getElementById("descripcion").value = "";
+      document.getElementById("monto").value = "";
+    });
+
+    function actualizar() {
+      const total = ingresos - egresos;
+      const porcentaje = ingresos > 0 ? ((egresos / ingresos) * 100).toFixed(1) : 0;
+
+      document.getElementById("ingresos").textContent = `+ ${ingresos.toFixed(2)}`;
+      document.getElementById("egresos").textContent = `- ${egresos.toFixed(2)}`;
+      document.getElementById("total").textContent = `${total >= 0 ? "+" : ""}${total.toFixed(2)}`;
+      document.getElementById("porcentaje").textContent = `${porcentaje}%`;
+    }
+
+    // Tabs funcionales
+    const tabIngresos = document.getElementById("tab-ingresos");
+    const tabEgresos = document.getElementById("tab-egresos");
+    const listaIngresos = document.getElementById("lista-ingresos");
+    const listaEgresos = document.getElementById("lista-egresos");
+
+    function activarTab(tab) {
+      if (tab === "ingresos") {
+        tabIngresos.classList.add("activo");
+        tabEgresos.classList.remove("activo");
+        listaIngresos.classList.add("visible");
+        listaEgresos.classList.remove("visible");
+      } else {
+        tabEgresos.classList.add("activo");
+        tabIngresos.classList.remove("activo");
+        listaEgresos.classList.add("visible");
+        listaIngresos.classList.remove("visible");
+      }
+    }
+
+    tabIngresos.addEventListener("click", () => activarTab("ingresos"));
+    tabEgresos.addEventListener("click", () => activarTab("egresos"));
+
+    // Inicializamos mostrando ingresos
+    activarTab("ingresos");
+
+    // Año footer
+    document.getElementById("anio-footer").textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>
