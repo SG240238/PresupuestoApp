@@ -9,6 +9,7 @@
 <body>
   <div class="wrapper">
     <div class="contenedor-central">
+      <!--Encabezado con el resumen del presupuesto-->
       <header class="encabezado">
         <h1 id="titulo-mes">Presupuesto de </h1>
         <h2 id="total">+ 0.00</h2>
@@ -31,6 +32,7 @@
 
       <main class="contenido">
         <section class="inferior">
+          <!--Formulario para la captura de detalle de ingresos y egresos-->
           <div class="transaccion">
             <h3>Transacción</h3>
             <div class="formulario">
@@ -44,6 +46,7 @@
             </div>
           </div>
 
+          <!--Lista de ingresos y egresos-->
           <div class="lista-transacciones">
             <div class="tabs">
               <button id="tab-ingresos">Ingresos</button>
@@ -73,15 +76,28 @@
     let ingresos = 0;
     let egresos = 0;
 
+    //Evento clic de boton "agregar" para agregar ingresos y gastos al presupuesto
     document.getElementById("agregar").addEventListener("click", () => {
       const tipo = document.getElementById("tipo").value;
       const descripcion = document.getElementById("descripcion").value.trim();
       const monto = parseFloat(document.getElementById("monto").value);
+      
+      //Validaciones de campos de entrada
+      if(descripcion === "" ) {
+        alert("Por favor, ingrese una descripción válida.");
+        return;
+      }
+      if(monto <= 0 || isNaN(monto)) {
+        alert("Por favor, ingrese un monto válido mayor que cero.");
+        return;
+      }
       if (!descripcion || isNaN(monto) || monto <= 0) return;
 
+      //Se crea un nuevo elemento de lista para agregar al ingreso o egreso
       const li = document.createElement("li");
       li.innerHTML = `<span>${descripcion}</span><span>${tipo === "ingreso" ? "+ " : "- "}${monto.toFixed(2)}</span>`;
 
+      //Se agrega el elemento a la lista correspondiente
       if (tipo === "ingreso") {
         document.getElementById("lista-ingresos").appendChild(li);
         ingresos += monto;
@@ -90,11 +106,15 @@
         egresos += monto;
       }
 
+      //Se llama a la funcion actualizar para refrescar los totales
       actualizar();
+
+      //Se limpian los campos del formulario
       document.getElementById("descripcion").value = "";
       document.getElementById("monto").value = "";
     });
 
+    //Función para actualizar los totales y el porcentaje de ingresos y egresos
     function actualizar() {
       const total = ingresos - egresos;
       const porcentaje = ingresos > 0 ? ((egresos / ingresos) * 100).toFixed(1) : 0;
@@ -111,6 +131,7 @@
     const listaIngresos = document.getElementById("lista-ingresos");
     const listaEgresos = document.getElementById("lista-egresos");
 
+    // Función para activar tab y mostrar la lista correspondiente de ingresos o egresos
     function activarTab(tab) {
       if (tab === "ingresos") {
         tabIngresos.classList.add("activo");
