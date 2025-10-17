@@ -78,6 +78,7 @@
 
     //Evento clic de boton "agregar" para agregar ingresos y gastos al presupuesto
     document.getElementById("agregar").addEventListener("click", () => {
+      //Obtener datos del formulario
       const tipo = document.getElementById("tipo").value;
       const descripcion = document.getElementById("descripcion").value.trim();
       const monto = parseFloat(document.getElementById("monto").value);
@@ -93,7 +94,7 @@
       }
       if (!descripcion || isNaN(monto) || monto <= 0) return;
 
-      //Se crea un nuevo elemento de lista para agregar al ingreso o egreso
+      //Se crea un nuevo elemento para agregar a la lista de ingreso o egreso
       const li = document.createElement("li");
       li.innerHTML = `<span>${descripcion}</span><span>${tipo === "ingreso" ? "+ " : "- "}${monto.toFixed(2)}</span>`;
 
