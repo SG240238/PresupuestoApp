@@ -1,149 +1,339 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Presupuesto Mensual</title>
-  <link rel="stylesheet" href="Estructura.css" />
+
+  <!-- BOOTSTRAP -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Enlace a CSS -->
+  <link rel="stylesheet" href="Estructura.css">
 </head>
 <body>
-  <div class="wrapper">
-    <div class="contenedor-central">
-      <!--Encabezado con el resumen del presupuesto-->
-      <header class="encabezado">
-        <h1 id="titulo-mes">Presupuesto de </h1>
-        <h2 id="total">+ 0.00</h2>
+  <!--
+    Contenedor de fondo y tarjeta principal.
+    La tarjeta (.card) contiene header, body (form + listas) y footer.
+  -->
+  <div class="bg">
+    <div class="card" role="main" aria-label="Aplicación de presupuesto">
+      <!-- ==========================
+           HEADER: título y totales
+           ========================== -->
+      <header class="card-header">
+        <!-- Título dinámico: actualizado por JS -->
+        <h1 id="tituloPresupuesto" class="title">Presupuesto de ...</h1>
 
-        <div class="cajas">
-          <div class="caja ingresos">
-            <span class="texto">INGRESOS:</span>
-            <span id="ingresos">+ 0.00</span>
+        <!-- Monto disponible grande -->
+        <div id="montoDisponible" class="big-amount">+ 0.00</div>
+
+        <!-- Indicadores verticales (Ingresos/Egresos/%Gastos) -->
+        <div class="header-stats" role="group" aria-label="Indicadores">
+          <div class="stat stat-income" aria-live="polite">
+            <div class="label">INGRESOS</div>
+            <div id="totalIngresos" class="value">+ 0.00</div>
           </div>
-          <div class="caja egresos">
-            <span class="texto">EGRESOS:</span>
-            <span id="egresos">- 0.00</span>
+
+          <div class="stat stat-expense" aria-live="polite">
+            <div class="label">EGRESOS</div>
+            <div id="totalEgresos" class="value">- 0.00</div>
+          </div>
+
+          <div class="stat-percent" aria-live="polite">
+            <div class="label">Porcentaje de gastos</div>
+            <div id="porcentajeGastos" class="value percent-small">0%</div>
           </div>
         </div>
       </header>
 
-      <main class="contenido">
-        <section class="inferior">
-          <!--Formulario para la captura de detalle de ingresos y egresos-->
-          <div class="transaccion">
-            <h3>Transacción</h3>
-            <div class="formulario">
-              <select id="tipo">
-                <option value="ingreso">Ingreso</option>
-                <option value="egreso">Egreso</option>
-              </select>
-              <input type="text" id="descripcion" placeholder="Descripción" />
-              <input type="number" id="monto" placeholder="Monto" />
-              <button id="agregar">Agregar</button>
-            </div>
+      <!-- ==========================
+           CARD BODY: Formulario (izq) + Listas (der)
+           ========================== -->
+      <div class="card-body">
+        <!-- LEFT: Formulario para agregar transacción -->
+        <section class="left">
+          <h2 class="section-title">Transacción</h2>
+
+          <!-- Form: no hace submit (onsubmit false) -->
+          <form id="formTransaccion" autocomplete="off" onsubmit="return false;">
+            <label class="label" for="tipo">Tipo</label>
+            <select id="tipo" class="input">
+              <option value="ingreso">Ingreso</option>
+              <option value="egreso">Egreso</option>
+            </select>
+
+            <label class="label" for="descripcion">Descripción</label>
+            <input id="descripcion" class="input" type="text" placeholder="Ej. Salario, Supermercado">
+
+            <label class="label" for="monto">Monto</label>
+            <input id="monto" class="input" type="number" min="0" step="0.01" placeholder="Ej. 250.00">
+
+            <!-- Botón azul (solicitado) -->
+            <button id="btnAgregar" type="button" class="btn btn-blue">Agregar</button>
+          </form>
+        </section>
+
+        <!-- RIGHT: Tabs grandes (divididos mitad/mitad) + listas con scroll -->
+        <section class="right">
+          <!--
+            Tabs: ahora DIVIDIDAS y GRANDES.
+            Cada botón ocupa 50% del ancho del contenedor .tabs-row.
+            Estilo controlado en styles.css para mantener lista del mismo tamaño.
+          -->
+          <div class="tabs-row" role="tablist" aria-label="Pestañas de movimientos">
+            <button class="tab tab-active" data-tab="ingresos" id="tabIngresos" role="tab" aria-selected="true">Ingresos</button>
+            <button class="tab" data-tab="egresos" id="tabEgresos" role="tab" aria-selected="false">Egresos</button>
           </div>
 
-          <!--Lista de ingresos y egresos-->
-          <div class="lista-transacciones">
-            <div class="tabs">
-              <button id="tab-ingresos">Ingresos</button>
-              <button id="tab-egresos">Egresos</button>
-            </div>
-            <ul id="lista-ingresos" class="lista"></ul>
-            <ul id="lista-egresos" class="lista"></ul>
+          <!-- listas: se mantienen con altura fija y scroll interno -->
+          <div class="lists" role="region" aria-label="Lista de transacciones">
+            <ul id="listaIngresos" class="list"></ul>
+            <ul id="listaEgresos" class="list hidden"></ul>
           </div>
         </section>
-      </main>
+      </div>
     </div>
   </div>
 
+  <!-- Footer al final de la página (fuera de la tarjeta) -->
+  <footer class="page-footer" role="contentinfo">
+    <div class="page-footer-inner">© <span id="anioPage"></span> Mi App Presupuesto. Todos los derechos reservados.</div>
+  </footer>
+
+  <!-- ===========================
+       JAVASCRIPT: lógica de la app
+       - Comentarios explicativos en todo el bloque
+       =========================== -->
   <script>
-    // Mostrar mes actual
-    const meses = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
-    const fecha = new Date();
-    document.getElementById("titulo-mes").textContent = `Presupuesto de ${meses[fecha.getMonth()]} ${fecha.getFullYear()}`;
+    /* -------------------------
+       Estado y referencias DOM
+       ------------------------- */
+    let transacciones = []; // array de objetos: { id, tipo, descripcion, monto, fecha }
 
-    let ingresos = 0;
-    let egresos = 0;
+    // Referencias a elementos importantes del DOM
+    const tituloPresupuesto = document.getElementById('tituloPresupuesto');
+    const montoDisponibleEl = document.getElementById('montoDisponible');
+    const totalIngresosEl = document.getElementById('totalIngresos');
+    const totalEgresosEl = document.getElementById('totalEgresos');
+    const porcentajeGastosEl = document.getElementById('porcentajeGastos');
 
-    //Evento clic de boton "agregar" para agregar ingresos y gastos al presupuesto
-    document.getElementById("agregar").addEventListener("click", () => {
-      //Obtener datos del formulario
-      const tipo = document.getElementById("tipo").value;
-      const descripcion = document.getElementById("descripcion").value.trim();
-      const monto = parseFloat(document.getElementById("monto").value);
-      
-      //Validaciones de campos de entrada
-      if(descripcion === "" ) {
-        alert("Por favor, ingrese una descripción válida.");
-        return;
-      }
-      if(monto <= 0 || isNaN(monto)) {
-        alert("Por favor, ingrese un monto válido mayor que cero.");
-        return;
-      }
-      if (!descripcion || isNaN(monto) || monto <= 0) return;
+    const tipoInput = document.getElementById('tipo');
+    const descripcionInput = document.getElementById('descripcion');
+    const montoInput = document.getElementById('monto');
+    const btnAgregar = document.getElementById('btnAgregar');
 
-      //Se crea un nuevo elemento para agregar a la lista de ingreso o egreso
-      const li = document.createElement("li");
-      li.innerHTML = `<span>${descripcion}</span><span>${tipo === "ingreso" ? "+ " : "- "}${monto.toFixed(2)}</span>`;
+    const listaIngresosEl = document.getElementById('listaIngresos');
+    const listaEgresosEl = document.getElementById('listaEgresos');
 
-      //Se agrega el elemento a la lista correspondiente
-      if (tipo === "ingreso") {
-        document.getElementById("lista-ingresos").appendChild(li);
-        ingresos += monto;
+    const tabBtns = document.querySelectorAll('.tab');
+
+    /* -------------------------
+       Funciones utilitarias
+       ------------------------- */
+    // Formatea a dos decimales
+    function formato(n) { return Number(n).toFixed(2); }
+
+    // Generador simple de id
+    function idGenerado(){ return Date.now().toString(36) + Math.floor(Math.random()*999).toString(36); }
+
+    // Evita inyección simple en descripciones
+    function escapeHtml(text) {
+      const map = { '&': '&amp;','<': '&lt;','>': '&gt;','"': '&quot;',"'": '&#039;' };
+      return String(text).replace(/[&<>"']/g, function(m){ return map[m]; });
+    }
+
+    /* -------------------------
+       Fecha / Título dinámico
+       ------------------------- */
+    function actualizarTitulo() {
+      const meses = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+      const f = new Date();
+      tituloPresupuesto.textContent = `Presupuesto de ${meses[f.getMonth()]} ${f.getFullYear()}`;
+      document.getElementById('anioFooter').textContent = f.getFullYear();
+      document.getElementById('anioPage').textContent = f.getFullYear();
+    }
+
+    /* -------------------------
+       Cálculo de totales
+       ------------------------- */
+    function totalIngresos() {
+      return transacciones.filter(t => t.tipo === 'ingreso').reduce((s, t) => s + Number(t.monto), 0);
+    }
+    function totalEgresos() {
+      return transacciones.filter(t => t.tipo === 'egreso').reduce((s, t) => s + Number(t.monto), 0);
+    }
+    function porcentajeGastosGlobal() {
+      const ing = totalIngresos();
+      const eg = totalEgresos();
+      if (ing <= 0) return 0;
+      return (eg * 100) / ing;
+    }
+
+    /* -------------------------
+       Actualizar header (totales visibles)
+       ------------------------- */
+    function actualizarHeader() {
+      const ing = totalIngresos();
+      const eg = totalEgresos();
+      const disponible = ing - eg;
+
+      // Mostrar con signos como pediste
+      totalIngresosEl.textContent = '+ ' + formato(ing);
+      totalEgresosEl.textContent = '- ' + formato(eg);
+      porcentajeGastosEl.textContent = Math.round(porcentajeGastosGlobal()) + '%';
+
+      // Color según positivo/negativo
+      if (disponible >= 0) {
+        montoDisponibleEl.textContent = '+ ' + formato(disponible);
+        montoDisponibleEl.style.color = '#2b6b9a';
       } else {
-        document.getElementById("lista-egresos").appendChild(li);
-        egresos += monto;
+        montoDisponibleEl.textContent = '- ' + formato(Math.abs(disponible));
+        montoDisponibleEl.style.color = '#c94b4b';
+      }
+    }
+
+    /* -------------------------
+       Render de listas (ingresos / egresos)
+       - Mantenemos tamaño fijo del contenedor .lists (scroll interno)
+       - Cada item es cuadrado y más grande (estilos en CSS)
+       ------------------------- */
+    function renderListas() {
+      // Limpiar
+      listaIngresosEl.innerHTML = '';
+      listaEgresosEl.innerHTML = '';
+
+      const ingresos = transacciones.filter(t => t.tipo === 'ingreso');
+      const egresos = transacciones.filter(t => t.tipo === 'egreso');
+      const totalIng = totalIngresos();
+
+      // Render ingresos
+      if (ingresos.length === 0) {
+        listaIngresosEl.innerHTML = '<li class="empty">No hay ingresos aún.</li>';
+      } else {
+        ingresos.forEach(i => {
+          const li = document.createElement('li');
+          li.className = 'item ingreso';
+          li.innerHTML = `<div class="desc">
+                            <div class="title-desc">${escapeHtml(i.descripcion)}</div>
+                            <div class="date">${new Date(i.fecha).toLocaleDateString()}</div>
+                          </div>
+                          <div class="right">
+                            <div class="amount">+ ${formato(i.monto)}</div>
+                            <button class="del btn-del" data-id="${i.id}" title="Eliminar">✕</button>
+                          </div>`;
+          listaIngresosEl.appendChild(li);
+        });
       }
 
-      //Se llama a la funcion actualizar para refrescar los totales
-      actualizar();
+      // Render egresos (con % individual)
+      if (egresos.length === 0) {
+        listaEgresosEl.innerHTML = '<li class="empty">No hay egresos aún.</li>';
+      } else {
+        egresos.forEach(e => {
+          const pct = totalIng > 0 ? Math.round((Number(e.monto) * 100) / totalIng) : 0;
+          const li = document.createElement('li');
+          li.className = 'item egreso';
+          li.innerHTML = `<div class="desc">
+                            <div class="title-desc">${escapeHtml(e.descripcion)}</div>
+                            <div class="date">${new Date(e.fecha).toLocaleDateString()}</div>
+                          </div>
+                          <div class="right">
+                            <div class="amount">- ${formato(e.monto)}</div>
+                            <div class="pct">${pct}%</div>
+                            <button class="del btn-del" data-id="${e.id}" title="Eliminar">✕</button>
+                          </div>`;
+          listaEgresosEl.appendChild(li);
+        });
+      }
 
-      //Se limpian los campos del formulario
-      document.getElementById("descripcion").value = "";
-      document.getElementById("monto").value = "";
+      // Eventos eliminar (asignar)
+      document.querySelectorAll('.del').forEach(btn => {
+        btn.addEventListener('click', () => {
+          eliminarTransaccion(btn.dataset.id);
+        });
+      });
+    }
+
+    /* -------------------------
+       Agregar / Eliminar transacciones
+       ------------------------- */
+    function agregarTransaccion() {
+      const tipo = tipoInput.value;
+      const descripcion = descripcionInput.value.trim();
+      const monto = Number(montoInput.value);
+
+      if (!descripcion || isNaN(monto) || monto <= 0) {
+        alert('Ingrese descripción y monto válido mayor a 0.');
+        return;
+      }
+
+      const nueva = {
+        id: idGenerado(),
+        tipo,
+        descripcion,
+        monto: Number(monto.toFixed(2)),
+        fecha: new Date().toISOString()
+      };
+
+      transacciones.push(nueva);
+
+      // limpiar formulario
+      descripcionInput.value = '';
+      montoInput.value = '';
+      tipoInput.value = 'ingreso';
+
+      actualizarUI();
+
+      // Cambiar tab para mostrar el tipo agregado
+      if (tipo === 'ingreso') activarTab('ingresos'); else activarTab('egresos');
+    }
+
+    function eliminarTransaccion(id) {
+      transacciones = transacciones.filter(t => t.id !== id);
+      actualizarUI();
+    }
+
+    /* -------------------------
+       Actualiza UI completa
+       ------------------------- */
+    function actualizarUI() {
+      actualizarHeader();
+      renderListas();
+    }
+
+    /* -------------------------
+       Tabs (activación)
+       -los botones ocupan 50% cada uno por diseño
+       ------------------------- */
+    function activarTab(tab) {
+      if (tab === 'ingresos') {
+        listaIngresosEl.classList.remove('hidden');
+        listaEgresosEl.classList.add('hidden');
+      } else {
+        listaIngresosEl.classList.add('hidden');
+        listaEgresosEl.classList.remove('hidden');
+      }
+      tabBtns.forEach(b => b.classList.toggle('tab-active', b.dataset.tab === tab));
+    }
+
+    /* -------------------------
+       Eventos
+       ------------------------- */
+    btnAgregar.addEventListener('click', agregarTransaccion);
+    tabBtns.forEach(b => {
+      b.addEventListener('click', () => activarTab(b.dataset.tab));
     });
 
-    //Función para actualizar los totales y el porcentaje de ingresos y egresos
-    function actualizar() {
-      const total = ingresos - egresos;
-      const porcentaje = ingresos > 0 ? ((egresos / ingresos) * 100).toFixed(1) : 0;
+    /* -------------------------
+       Inicialización
+       - Aquí puedes descomentar ejemplos para pruebas rápidas
+       ------------------------- */
+    (function init() {
+      actualizarTitulo();
+      actualizarUI();
 
-      document.getElementById("ingresos").textContent = `+ ${ingresos.toFixed(2)}`;
-      document.getElementById("egresos").textContent = `- ${egresos.toFixed(2)}`;
-      document.getElementById("total").textContent = `${total >= 0 ? "+" : ""}${total.toFixed(2)}`;
-      document.getElementById("porcentaje").textContent = `${porcentaje}%`;
-    }
-
-    // Tabs funcionales
-    const tabIngresos = document.getElementById("tab-ingresos");
-    const tabEgresos = document.getElementById("tab-egresos");
-    const listaIngresos = document.getElementById("lista-ingresos");
-    const listaEgresos = document.getElementById("lista-egresos");
-
-    // Función para activar tab y mostrar la lista correspondiente de ingresos o egresos
-    function activarTab(tab) {
-      if (tab === "ingresos") {
-        tabIngresos.classList.add("activo");
-        tabEgresos.classList.remove("activo");
-        listaIngresos.classList.add("visible");
-        listaEgresos.classList.remove("visible");
-      } else {
-        tabEgresos.classList.add("activo");
-        tabIngresos.classList.remove("activo");
-        listaEgresos.classList.add("visible");
-        listaIngresos.classList.remove("visible");
-      }
-    }
-
-    tabIngresos.addEventListener("click", () => activarTab("ingresos"));
-    tabEgresos.addEventListener("click", () => activarTab("egresos"));
-
-    // Inicializamos mostrando ingresos
-    activarTab("ingresos");
-
-    // Año footer
-    document.getElementById("anio-footer").textContent = new Date().getFullYear();
+    })();
   </script>
 </body>
 </html>

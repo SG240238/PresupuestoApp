@@ -1,237 +1,218 @@
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: "Poppins", sans-serif;
+/* =========================
+   styles.css
+   - Estilos principales de la app
+   - Comentarios incluidos para que entiendas cada bloque
+   ========================= */
+
+/* -------------------------
+   Variables y reset básico
+   ------------------------- */
+:root{
+  --blue-1: #11395f;       /* color superior del degradado */
+  --blue-2: #6b9ad1;       /* color inferior del degradado */
+  --card-bg: #ffffff;
+  --muted: #9aa3ad;
+  --dark: #123042;
+  --accent: #2b6b9a;
+  --danger: #c94b4b;
+  --btn-blue: #14485f;     /* color del botón azul */
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+
+/* -------------------------
+   Layout base del body
+   - Usamos flex-column para forzar footer al pie
+   ------------------------- */
+body{
+  margin:0;
+  display:flex;
+  flex-direction:column; /* para que el footer quede al final */
+  min-height:100vh;
+  font-family: "Inter", "Helvetica Neue", Arial, sans-serif;
+  background: linear-gradient(180deg, var(--blue-1) 0%, var(--blue-2) 100%);
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  padding:40px 24px 0 24px; /* espacio arriba y lados */
 }
 
-
-html, body {
-  height: 100%;
-  margin: 0;
-  padding: 0;
+/* -------------------------
+   Contenedor central que crece
+   .bg ocupa el espacio vertical disponible
+   ------------------------- */
+.bg{
+  flex:1; /* permite que el footer quede pegado al final cuando haya poco contenido */
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  min-height: calc(100vh - 160px);
 }
 
-/* El body organiza con flex los elementos: wrapper + footer */
-body {
-  display: flex;
-  flex-direction: column;
-  background-color: #8ea8dc;
-  align-items: center;
-}
-
-
-.wrapper {
-  flex: 1;                     /* que crezca para ocupar el espacio disponible */
-  display: flex;
-  justify-content: center;     /* centra horizontalmente */
-  align-items: center;         /* centra verticalmente */
-  width: 100%;
-}
-
-
-.contenedor-central {
-  background-color: #fff;
+/* -------------------------
+   Tarjeta (card) principal
+   ------------------------- */
+.card{
+  width: 95%;
+  max-width: 1200px;
+  background: var(--card-bg);
   border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-  width: 1300px;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  margin: 1rem 0; 
+  box-shadow: 0 18px 40px rgba(15,30,45,0.12);
+  overflow:hidden;
 }
 
-
-.contenedor-central .contenido {
-  flex: 1;
+/* -------------------------
+   HEADER dentro de la tarjeta
+   - Contiene título, monto y stats verticales
+   ------------------------- */
+.card-header{
+  padding: 36px 56px 18px 56px;
+  text-align:center;
+  background: linear-gradient(180deg, rgba(255,255,255,0.85), rgba(255,255,255,0.95));
 }
+.title{ font-size:20px; color: #253238; margin-bottom: 10px; font-weight:700; }
+.big-amount{ font-size:42px; font-weight:800; color: var(--dark); margin-bottom: 14px; }
 
-
-.encabezado {
-  text-align: center;
-  padding: 2.5rem 1rem;
-  background-color: #eef1f7;
+/* -------------------------
+   HEADER STATS (ahora vertical y centrado)
+   - Cada .stat muestra label y value en misma línea
+   ------------------------- */
+.header-stats{
+  display:flex;
+  flex-direction:column;   /* vertical */
+  align-items:center;
+  gap:10px;
+  margin-top:6px;
+  width: 280px;            /* ancho fijo para mantener consistencia */
+  margin-left: auto;
+  margin-right: auto;
 }
-
-.encabezado h1 {
-  font-size: 1.6rem;
-  margin-bottom: 0.5rem;
+.stat{
+  padding:10px 14px;
+  border-radius:8px;
+  min-width:240px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:8px;
+  font-weight:700;
+  font-size:14px;
 }
+.stat-income{ background: var(--btn-blue); color:#fff; }
+.stat-expense{ background: #fff; color:var(--dark); border: 1px solid #e6e9ee; }
+.stat .label{ font-weight:700; opacity:0.9; font-size:13px }
+.stat .value{ font-size:16px }
 
-.encabezado h2 {
-  font-size: 2rem;
-  color: #1a3c64;
-  margin-bottom: 1.5rem;
+/* Pequeño estilo para el porcentaje global */
+.stat-percent{ display:flex; justify-content:space-between; align-items:center; width:100%; color:var(--muted); font-size:13px; }
+.stat-percent .value { background:var(--btn-blue); color:#fff; padding:6px 8px; border-radius:6px; font-weight:700; font-size:13px; }
+
+/* -------------------------
+   CARD BODY: layout izquierdo / derecho
+   ------------------------- */
+.card-body{ display:flex; gap:0; padding: 26px 26px 36px 26px; }
+
+/* LEFT: FORM */
+.left{ width:48%; padding-right:20px; border-right:1px solid #f0f2f4; }
+.section-title{ font-size:18px; color:var(--dark); margin-bottom:10px; font-weight:700; }
+.label{ display:block; margin-top:12px; margin-bottom:6px; color:#596b73; font-weight:600; font-size:13px; }
+
+.input{ width:100%; padding:12px 14px; border-radius:6px; border:1px solid #eef2f4; background: #fafbfc; font-size:14px; outline:none; }
+.input:focus{ box-shadow: 0 8px 30px rgba(20,72,95,0.06); border-color:#d0dbe3; }
+.form{ display:flex; flex-direction:column; }
+
+/* BOTÓN AZUL (completo) */
+.btn{ display:inline-block; padding:12px 18px; border-radius:6px; border:0; cursor:pointer; font-weight:700; margin-top:16px; }
+.btn-blue{ width:100%; background: var(--btn-blue); color:#fff; box-shadow: 0 10px 30px rgba(20,72,95,0.12); }
+
+/* -------------------------
+   RIGHT: Tabs grandes y listas con scroll interno
+   - tabs-row: los botones se dividen 50%/50% (cada tab ocupa la mitad)
+   ------------------------- */
+.right{ width:52%; padding-left:28px; }
+
+/* Contenedor de pestañas: cada .tab ocupa 50% y es grande */
+.tabs-row{
+  display:flex;
+  width:100%;
+  gap:0;
+  margin-bottom:14px;
 }
-
-.cajas {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.8rem;
-}
-
-.caja {
-  width: 220px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0.6rem 1rem;
-  border-radius: 5px;
-  font-weight: bold;
-}
-
-.caja.ingresos {
-  background-color: #1a3c64;
-  color: #fff;
-}
-
-.caja.egresos {
-  border: 2px solid #1a3c64;
-  background-color: #fff;
-  color: #1a3c64;
-}
-
-.porcentaje {
-  margin-top: 1rem;
-  font-size: 0.95rem;
-  color: #333;
-}
-
-.porcentaje span {
-  background-color: #1a3c64;
-  color: white;
-  padding: 2px 8px;
-  border-radius: 3px;
-  font-weight: bold;
-}
-
-
-.inferior {
-  display: flex;
-  padding: 2rem;
-  gap: 2rem;
-}
-
-
-.transaccion {
-  flex: 1;
-}
-
-.transaccion h3 {
-  margin-bottom: 1rem;
-  font-size: 1.2rem;
-}
-
-.formulario {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.formulario select,
-.formulario input {
-  padding: 0.7rem;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-}
-
-button {
-  background-color: #1a3c64;
-  color: white;
+.tab{
+  flex:1;                    /* ocupa mitad del ancho cada uno */
+  background: #e9ecef;
+  border-radius: 6px 6px 0 0;  /* menos redondeo y se ve como "dividido" */
+  padding:16px 0;            /* mayor altura */
   border: none;
-  border-radius: 5px;
-  padding: 0.7rem;
-  cursor: pointer;
-  font-weight: bold;
+  font-weight:700;
+  color: #2b3b44;
+  cursor:pointer;
+  text-align:center;
+  transition: background .12s;
 }
+.tab + .tab{ margin-left:0 } /* no gap visual, están unidos */
+.tab-active{ background: var(--btn-blue); color:#fff; box-shadow: 0 6px 18px rgba(20,72,95,0.08); }
 
-button:hover {
-  background-color: #10253d;
+/* -------------------------
+   LISTS: área con tamaño fijo y scroll interno (opción A)
+   ------------------------- */
+.lists{
+  background:transparent;
+  padding:6px 4px;
+  min-height:220px;
+  max-height:320px; /* mantiene tamaño y genera scroll si hay más items */
+  overflow:auto;
 }
+/* Cada UL (lista) */
+.list{ list-style:none; margin:0; padding:6px 0; }
+.list.hidden{ display:none; }
 
-/* Lista con tabs */
-.lista-transacciones {
-  flex: 1;
+/* -------------------------
+   ITEMS: cuadrados (poco redondeo), mayor altura
+   ------------------------- */
+.item{
+  background: #fbfcfd;
+  border-radius:4px;    /* casi cuadrado */
+  margin-bottom:12px;
+  padding:16px 18px;    /* más alto */
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  border-left:6px solid;
+  box-shadow: 0 4px 14px rgba(15,30,45,0.03);
+  min-height:64px;      /* más alto */
 }
+.item.ingreso{ border-color: #2ecc71; }
+.item.egreso{ border-color: #ff6b6b; }
 
-.tabs {
-  display: flex;
-  margin-bottom: 1rem;
-}
+.item .desc{ font-weight:700; color:#263238; max-width:60%; }
+.item .date{ font-size:12px; color:var(--muted); font-weight:500; margin-top:6px; }
 
-.tabs button {
-  flex: 1;
-  padding: 0.8rem;
-  border: none;
-  font-weight: bold;
-  cursor: pointer;
-}
+.right .right{ display:flex; align-items:center; gap:12px; }
+.amount{ font-weight:800; font-size:16px; }
+.pct{ background: #2b6b9a; color:#fff; padding:8px 10px; border-radius:6px; font-weight:800; font-size:13px; }
 
-#tab-ingresos {
-  background-color: #1a3c64;
-  color: #fff;
-  border-top-left-radius: 8px;
-}
+/* Botón eliminar (estilo simple) */
+.del{ border:0; background:transparent; color:#97a0a6; font-weight:700; cursor:pointer; }
 
-#tab-egresos {
-  background-color: #d9d9d9;
-  color: #333;
-  border-top-right-radius: 8px;
-}
+/* Mensaje cuando está vacío */
+.empty{ color:var(--muted); padding:16px; text-align:center; font-size:14px }
 
-.tabs .activo {
-  background-color: #1a3c64 !important;
-  color: #fff !important;
-}
+/* Footer interno de la tarjeta */
+.card-footer{ padding: 12px 56px 20px 56px; border-top:1px solid #f0f2f4; text-align:center; color:var(--muted); font-size:13px; }
 
-.lista {
-  display: none;
-  background-color: #fff;
-  border: 1px solid #ddd;
-  border-top: none;
-  border-radius: 0 0 8px 8px;
-  padding: 1rem;
-  list-style: none;
-  min-height: 120px;
-}
+/* Footer al final de la página (fuera de la tarjeta) */
+.page-footer{ margin-top:18px; text-align:center; color:#ffffffcc; padding:18px 8px; }
+.page-footer-inner{ font-size:14px; }
 
-.lista.visible {
-  display: block;
-}
-
-.lista li {
-  display: flex;
-  justify-content: space-between;
-  border-bottom: 1px solid #eee;
-  padding: 0.4rem 0;
-}
-
-.lista li:last-child {
-  border-bottom: none;
-}
-
-/* Footer */
-.footer {
-  flex-shrink: 0;
-  background-color: #1a3c64;
-  color: #fff;
-  text-align: center;
-  padding: 1.5rem 0;
-  width: 100%;
-}
-
-.footer .footer-content {
-  max-width: 600px;
-  margin: 0 auto;
-}
-
-.footer a {
-  color: #f0f4ff;
-  text-decoration: none;
-  margin: 0 0.5rem;
-}
-
-.footer a:hover {
-  text-decoration: underline;
+/* -------------------------
+   Responsive adjustments
+   ------------------------- */
+@media (max-width: 980px){
+  body{ padding:24px 12px 12px 12px; }
+  .card-body{ flex-direction:column; }
+  .left, .right{ width:100%; padding:12px 20px; border-right:none; }
+  .right{ padding-top:8px; }
+  .card{ margin:20px; }
+  .header-stats{ width:100%; }
+  .lists{ max-height: 320px; }
 }
