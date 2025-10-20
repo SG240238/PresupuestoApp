@@ -41,7 +41,7 @@ body{
    .bg ocupa el espacio vertical disponible
    ------------------------- */
 .bg{
-  flex:1; /* permite que el footer quede pegado al final cuando haya poco contenido */
+  flex:1; 
   display:flex;
   align-items:center;
   justify-content:center;
@@ -78,11 +78,11 @@ body{
    ------------------------- */
 .header-stats{
   display:flex;
-  flex-direction:column;   /* vertical */
+  flex-direction:column;   
   align-items:center;
   gap:10px;
   margin-top:6px;
-  width: 280px;            /* ancho fijo para mantener consistencia */
+  width: 280px;            
   margin-left: auto;
   margin-right: auto;
 }
@@ -138,10 +138,10 @@ body{
   margin-bottom:14px;
 }
 .tab{
-  flex:1;                    /* ocupa mitad del ancho cada uno */
+  flex:1;                    
   background: #e9ecef;
-  border-radius: 6px 6px 0 0;  /* menos redondeo y se ve como "dividido" */
-  padding:16px 0;            /* mayor altura */
+  border-radius: 6px 6px 0 0;  
+  padding:16px 0;            
   border: none;
   font-weight:700;
   color: #2b3b44;
@@ -149,7 +149,7 @@ body{
   text-align:center;
   transition: background .12s;
 }
-.tab + .tab{ margin-left:0 } /* no gap visual, están unidos */
+.tab + .tab{ margin-left:0 } 
 .tab-active{ background: var(--btn-blue); color:#fff; box-shadow: 0 6px 18px rgba(20,72,95,0.08); }
 
 /* -------------------------
@@ -159,7 +159,7 @@ body{
   background:transparent;
   padding:6px 4px;
   min-height:220px;
-  max-height:320px; /* mantiene tamaño y genera scroll si hay más items */
+  max-height:320px; 
   overflow:auto;
 }
 /* Cada UL (lista) */
@@ -171,15 +171,15 @@ body{
    ------------------------- */
 .item{
   background: #fbfcfd;
-  border-radius:4px;    /* casi cuadrado */
+  border-radius:4px;    
   margin-bottom:12px;
-  padding:16px 18px;    /* más alto */
+  padding:16px 18px;    
   display:flex;
   justify-content:space-between;
   align-items:center;
   border-left:6px solid;
   box-shadow: 0 4px 14px rgba(15,30,45,0.03);
-  min-height:64px;      /* más alto */
+  min-height:64px;      
 }
 .item.ingreso{ border-color: #2ecc71; }
 .item.egreso{ border-color: #ff6b6b; }

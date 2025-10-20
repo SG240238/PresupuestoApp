@@ -28,7 +28,6 @@
         <!-- Monto disponible grande -->
         <div id="montoDisponible" class="big-amount">+ 0.00</div>
 
-        <!-- Indicadores verticales (Ingresos/Egresos/%Gastos) -->
         <div class="header-stats" role="group" aria-label="Indicadores">
           <div class="stat stat-income" aria-live="polite">
             <div class="label">INGRESOS</div>
@@ -46,16 +45,11 @@
           </div>
         </div>
       </header>
-
-      <!-- ==========================
-           CARD BODY: Formulario (izq) + Listas (der)
-           ========================== -->
       <div class="card-body">
         <!-- LEFT: Formulario para agregar transacción -->
         <section class="left">
           <h2 class="section-title">Transacción</h2>
 
-          <!-- Form: no hace submit (onsubmit false) -->
           <form id="formTransaccion" autocomplete="off" onsubmit="return false;">
             <label class="label" for="tipo">Tipo</label>
             <select id="tipo" class="input">
@@ -68,8 +62,6 @@
 
             <label class="label" for="monto">Monto</label>
             <input id="monto" class="input" type="number" min="0" step="0.01" placeholder="Ej. 250.00">
-
-            <!-- Botón azul (solicitado) -->
             <button id="btnAgregar" type="button" class="btn btn-blue">Agregar</button>
           </form>
         </section>
@@ -96,15 +88,11 @@
     </div>
   </div>
 
-  <!-- Footer al final de la página (fuera de la tarjeta) -->
+  <!-- Footer al final de la página -->
   <footer class="page-footer" role="contentinfo">
     <div class="page-footer-inner">© <span id="anioPage"></span> Mi App Presupuesto. Todos los derechos reservados.</div>
   </footer>
 
-  <!-- ===========================
-       JAVASCRIPT: lógica de la app
-       - Comentarios explicativos en todo el bloque
-       =========================== -->
   <script>
     /* -------------------------
        Estado y referencias DOM
@@ -193,11 +181,6 @@
       }
     }
 
-    /* -------------------------
-       Render de listas (ingresos / egresos)
-       - Mantenemos tamaño fijo del contenedor .lists (scroll interno)
-       - Cada item es cuadrado y más grande (estilos en CSS)
-       ------------------------- */
     function renderListas() {
       // Limpiar
       listaIngresosEl.innerHTML = '';
@@ -302,10 +285,7 @@
       renderListas();
     }
 
-    /* -------------------------
-       Tabs (activación)
-       -los botones ocupan 50% cada uno por diseño
-       ------------------------- */
+
     function activarTab(tab) {
       if (tab === 'ingresos') {
         listaIngresosEl.classList.remove('hidden');
@@ -325,10 +305,6 @@
       b.addEventListener('click', () => activarTab(b.dataset.tab));
     });
 
-    /* -------------------------
-       Inicialización
-       - Aquí puedes descomentar ejemplos para pruebas rápidas
-       ------------------------- */
     (function init() {
       actualizarTitulo();
       actualizarUI();
